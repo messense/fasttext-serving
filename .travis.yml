@@ -21,7 +21,7 @@ deploy:
   file_glob: true
   file:
     - target/release/fasttext-serving
-    - target/release/fasttext-serving*.deb
+    - target/debian/fasttext-serving*.deb
   skip_cleanup: true
   on:
     tags: true

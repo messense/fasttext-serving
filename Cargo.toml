@@ -1,7 +1,10 @@
 [package]
 name = "fasttext-serving"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Messense Lv <messense@icloud.com>"]
+description = "fastText model serving API server"
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 rocket = "0.3"
