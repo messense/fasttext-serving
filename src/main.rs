@@ -20,6 +20,18 @@ struct PredictOptions {
     threshold: Option<f32>,
 }
 
+#[inline]
+fn predict_one(model: &FastText, text: &str, k: i32, threshold: f32) -> (Vec<String>, Vec<f32>) {
+    let preds = model.predict(text, k, threshold);
+    let mut labels = Vec::with_capacity(preds.len());
+    let mut probs = Vec::with_capacity(preds.len());
+    for pred in &preds {
+        labels.push(pred.label.trim_left_matches("__label__").to_string());
+        probs.push(pred.prob);
+    }
+    (labels, probs)
+}
+
 #[post("/predict", format = "application/json", data = "<texts>")]
 fn predict_without_option(model: State<FastText>, texts: Json<Vec<String>>) -> Json<Vec<(Vec<String>, Vec<f32>)>> {
     // XXX: https://github.com/SergioBenitez/Rocket/issues/376
@@ -30,16 +42,16 @@ fn predict_without_option(model: State<FastText>, texts: Json<Vec<String>>) -> J
 fn predict(model: State<FastText>, texts: Json<Vec<String>>, options: PredictOptions) -> Json<Vec<(Vec<String>, Vec<f32>)>> {
     let k = options.k.unwrap_or(1);
     let threshold = options.threshold.unwrap_or(0.0);
-    let ret: Vec<(Vec<String>, Vec<f32>)> = texts.par_iter().map(|txt| {
-        let preds = model.predict(txt, k, threshold);
-        let mut labels = Vec::with_capacity(preds.len());
-        let mut probs = Vec::with_capacity(preds.len());
-        for pred in &preds {
-            labels.push(pred.label.trim_left_matches("__label__").to_string());
-            probs.push(pred.prob);
-        }
-        (labels, probs)
-    }).collect();
+    let text_count = texts.len();
+    let ret: Vec<(Vec<String>, Vec<f32>)> = if text_count > 1{
+        texts.par_iter().map(|txt| {
+            predict_one(model.inner(), txt, k, threshold)
+        }).collect()
+    } else if text_count == 1 {
+        vec![predict_one(model.inner(), &texts[0], k, threshold)]
+    } else {
+        Vec::new()
+    };
     Json(ret)
 }
 
