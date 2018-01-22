@@ -1,0 +1,13 @@
+[package]
+name = "fasttext-serving"
+version = "0.1.0"
+authors = ["Messense Lv <messense@icloud.com>"]
+
+[dependencies]
+rocket = "0.3"
+rocket_codegen = "0.3"
+rocket_contrib = "0.3"
+fasttext = { git = "https://github.com/messense/fasttext-rs.git" }
+serde_json = "1.0"
+clap = "2.29"
+rayon = "0.9"
