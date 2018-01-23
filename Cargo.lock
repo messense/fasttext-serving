@@ -113,7 +113,7 @@ dependencies = [
 
 [[package]]
 name = "fasttext-serving"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap 2.29.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "fasttext 0.1.0 (git+https://github.com/messense/fasttext-rs.git)",
