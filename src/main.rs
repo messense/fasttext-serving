@@ -25,7 +25,15 @@ struct RocketWorkerCount(u16);
 
 #[inline]
 fn predict_one(model: &FastText, text: &str, k: i32, threshold: f32) -> (Vec<String>, Vec<f32>) {
-    let preds = model.predict(text, k, threshold);
+    // NOTE: text needs to end in a newline
+    // to exactly mimic the behavior of the cli
+    let preds = if text.ends_with('\n') {
+        model.predict(text, k, threshold)
+    } else {
+        let mut text = text.to_string();
+        text.push('\n');
+        model.predict(&text, k, threshold)
+    };
     let mut labels = Vec::with_capacity(preds.len());
     let mut probs = Vec::with_capacity(preds.len());
     for pred in &preds {
