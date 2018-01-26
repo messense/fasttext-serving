@@ -5,6 +5,7 @@ authors = ["Messense Lv <messense@icloud.com>"]
 description = "fastText model serving API server"
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/messense/fasttext-serving.git"
 
 [package.metadata.deb]
 maintainer = "Messense Lv <messense@icloud.com>"
