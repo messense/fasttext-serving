@@ -20,13 +20,10 @@ assets = [
 ]
 
 [dependencies]
-# rocket = "0.3"
-# rocket_codegen = "0.3"
-# rocket_contrib = "0.3"
-rocket = { git = "https://github.com/messense/Rocket.git", branch = "v0.3" }
-rocket_codegen = { git = "https://github.com/messense/Rocket.git", branch = "v0.3" }
-rocket_contrib = { git = "https://github.com/messense/Rocket.git", branch = "v0.3" }
-fasttext = { git = "https://github.com/messense/fasttext-rs.git" }
+rocket = "0.3"
+rocket_codegen = "0.3"
+rocket-lenient-json = "0.1"
+fasttext = "0.1"
 serde_json = "1.0"
 clap = "2.29"
 rayon = "0.9"

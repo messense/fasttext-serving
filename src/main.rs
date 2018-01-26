@@ -2,7 +2,7 @@
 #![feature(custom_derive)]
 #![plugin(rocket_codegen)]
 extern crate rocket;
-extern crate rocket_contrib;
+extern crate rocket_lenient_json;
 extern crate clap;
 extern crate rayon;
 extern crate fasttext;
@@ -11,7 +11,7 @@ use std::path::Path;
 use rayon::prelude::*;
 use rocket::State;
 use rocket::fairing::AdHoc;
-use rocket_contrib::Json;
+use rocket_lenient_json::Json;
 use clap::{App, Arg};
 use fasttext::FastText;
 
@@ -43,7 +43,7 @@ fn predict_one(model: &FastText, text: &str, k: i32, threshold: f32) -> (Vec<Str
     (labels, probs)
 }
 
-#[post("/predict", format = "application/json", data = "<texts>")]
+#[post("/predict", data = "<texts>")]
 fn predict_without_option(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>)
     -> Json<Vec<(Vec<String>, Vec<f32>)>>
 {
@@ -51,7 +51,7 @@ fn predict_without_option(worker_count: State<RocketWorkerCount>, model: State<F
     predict(worker_count, model, texts, Default::default())
 }
 
-#[post("/predict?<options>", format = "application/json", data = "<texts>")]
+#[post("/predict?<options>", data = "<texts>")]
 fn predict(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>, options: PredictOptions)
     -> Json<Vec<(Vec<String>, Vec<f32>)>>
 {
