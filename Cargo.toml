@@ -24,7 +24,6 @@ rocket = "0.3"
 rocket_codegen = "0.3"
 rocket-lenient-json = "0.1"
 fasttext = "0.1"
-serde_json = "1.0"
 clap = "2.29"
 rayon = "0.9"
 
