@@ -1,17 +1,23 @@
 # fasttext-serving
 
 [![Build Status](https://travis-ci.org/messense/fasttext-serving.svg?branch=master)](https://travis-ci.org/messense/fasttext-serving)
+[![Crates.io](https://img.shields.io/crates/v/fasttext-serving.svg)](https://crates.io/crates/fasttext-serving)
 
 fastText model serving service
+
+## Installation
+
+You can download prebuilt binary from [GitHub releases](https://github.com/messense/fasttext-serving/releases),
+or install it using Cargo:
+
+```bash
+cargo install fasttext-serving
+```
 
 ## Usage
 
 ```bash
 $ fasttext-serving --help
-
-fasttext-serving 0.1.1
-Messense Lv <messense@icloud.com>
-fastText model serving service
 
 USAGE:
     fasttext-serving --model <model>
