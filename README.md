@@ -30,6 +30,36 @@ OPTIONS:
     -m, --model <model>    Model path
 ```
 
+Please refer to [Rocket documentation](https://rocket.rs/guide/configuration/#configuration) for configuration.
+Some common environment variables:
+
+```bash
+# Rocket configuration environment, use prod for production deployment
+ROCKET_ENV=prod
+# Rocket listen address
+ROCKET_ADDRESS=0.0.0.0
+# Rocket listen port
+ROCKET_PORT=8080
+# Rocket worker threads
+ROCKET_WORKERS=8
+```
+
+HTTP API endpoint:
+
+```
+POST /predict
+```
+
+Post data should be JSON array of string, for example `["abc", "def"]`
+
+CURL example:
+
+```bash
+curl -X POST \
+     --data "[\"Which baking dish is best to bake a banana bread?\", \"Why not put knives in the dishwasher?\"]" \
+     'http://localhost:8000/predict'
+```
+
 ## License
 
 This work is released under the MIT license. A copy of the license is provided in the [LICENSE](./LICENSE) file.
