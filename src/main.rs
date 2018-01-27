@@ -7,6 +7,7 @@ extern crate clap;
 extern crate rayon;
 extern crate fasttext;
 
+use std::env;
 use std::path::Path;
 use rayon::prelude::*;
 use rocket::State;
@@ -88,10 +89,40 @@ fn main() {
                  .value_name("model")
                  .takes_value(true)
                  .help("Model path"))
+        .arg(Arg::with_name("address")
+                 .short("a")
+                 .long("address")
+                 .default_value("127.0.0.1")
+                 .takes_value(true)
+                 .help("Listen address"))
+        .arg(Arg::with_name("port")
+                 .short("p")
+                 .long("port")
+                 .default_value("8000")
+                 .takes_value(true)
+                 .help("Listen port"))
+        .arg(Arg::with_name("workers")
+                 .short("w")
+                 .long("workers")
+                 .alias("concurrency")
+                 .takes_value(true)
+                 .help("Worker thread count, defaults to CPU count"))
         .get_matches();
     let model_path = matches.value_of("model").unwrap();
     if !Path::new(model_path).exists() {
         panic!(format!("Error: model {} does not exists", model_path));
+    }
+    if env::var("ROCKET_ENV").is_err() {
+        env::set_var("ROCKET_ENV", "prod");
+    }
+    if let Some(address) = matches.value_of("address") {
+        env::set_var("ROCKET_ADDRESS", address);
+    }
+    if let Some(port) = matches.value_of("port") {
+        env::set_var("ROCKET_PORT", port);
+    }
+    if let Some(workers) = matches.value_of("workers") {
+        env::set_var("ROCKET_WORKERS", workers);
     }
     let mut fasttext = FastText::new();
     fasttext.load_model(model_path);

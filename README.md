@@ -20,29 +20,20 @@ cargo install fasttext-serving
 $ fasttext-serving --help
 
 USAGE:
-    fasttext-serving --model <model>
+    fasttext-serving [OPTIONS] --model <model>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -m, --model <model>    Model path
+    -a, --address <address>    Listen address [default: 127.0.0.1]
+    -m, --model <model>        Model path
+    -p, --port <port>          Listen port [default: 8000]
+    -w, --workers <workers>    Worker thread count, defaults to CPU count
 ```
 
 Please refer to [Rocket documentation](https://rocket.rs/guide/configuration/#configuration) for configuration.
-Some common environment variables:
-
-```bash
-# Rocket configuration environment, use prod for production deployment
-ROCKET_ENV=prod
-# Rocket listen address
-ROCKET_ADDRESS=0.0.0.0
-# Rocket listen port
-ROCKET_PORT=8080
-# Rocket worker threads
-ROCKET_WORKERS=8
-```
 
 HTTP API endpoint:
 
@@ -55,9 +46,10 @@ Post data should be JSON array of string, for example `["abc", "def"]`
 CURL example:
 
 ```bash
-curl -X POST \
+$ curl -X POST \
      --data "[\"Which baking dish is best to bake a banana bread?\", \"Why not put knives in the dishwasher?\"]" \
      'http://localhost:8000/predict'
+[[["baking"],[0.7152988]],[["equipment"],[0.73479545]]]
 ```
 
 ## License
