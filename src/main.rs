@@ -18,22 +18,24 @@ use fasttext::FastText;
 
 #[derive(FromForm, Debug, Default)]
 struct PredictOptions {
-    k: Option<i32>,
+    k: Option<u32>,
     threshold: Option<f32>,
 }
 
 struct RocketWorkerCount(u16);
 
 #[inline]
-fn predict_one(model: &FastText, text: &str, k: i32, threshold: f32) -> (Vec<String>, Vec<f32>) {
+fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<String>, Vec<f32>) {
+    // Ensure k >= 1
+    let k = if k > 0 { k } else { 1 };
     // NOTE: text needs to end in a newline
     // to exactly mimic the behavior of the cli
     let preds = if text.ends_with('\n') {
-        model.predict(text, k, threshold)
+        model.predict(text, k as i32, threshold)
     } else {
         let mut text = text.to_string();
         text.push('\n');
-        model.predict(&text, k, threshold)
+        model.predict(&text, k as i32, threshold)
     };
     let mut labels = Vec::with_capacity(preds.len());
     let mut probs = Vec::with_capacity(preds.len());
