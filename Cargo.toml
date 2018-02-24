@@ -25,8 +25,8 @@ rocket = "0.3"
 rocket_codegen = "0.3"
 rocket-lenient-json = "0.1"
 fasttext = "0.1"
-clap = "2.29"
-rayon = "0.9"
+clap = "2.30"
+rayon = "1.0"
 
 [profile.release]
 lto = true
