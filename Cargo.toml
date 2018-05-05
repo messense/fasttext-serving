@@ -23,7 +23,7 @@ assets = [
 [dependencies]
 rocket = "0.3"
 rocket_codegen = "0.3"
-rocket-lenient-json = "0.1"
+rocket-lenient-json = "0.3"
 fasttext = "0.1"
 clap = "2.30"
 rayon = "1.0"
