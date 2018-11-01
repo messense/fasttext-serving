@@ -1,8 +1,7 @@
-#![feature(plugin)]
-#![feature(custom_derive)]
-#![plugin(rocket_codegen)]
-extern crate rocket;
-extern crate rocket_lenient_json;
+#![feature(proc_macro_hygiene, decl_macro)]
+
+#[macro_use] extern crate rocket;
+extern crate rocket_contrib;
 extern crate clap;
 extern crate rayon;
 extern crate fasttext;
@@ -11,8 +10,9 @@ use std::env;
 use std::path::Path;
 use rayon::prelude::*;
 use rocket::State;
+use rocket::request::Form;
 use rocket::fairing::AdHoc;
-use rocket_lenient_json::Json;
+use rocket_contrib::json::Json;
 use clap::{App, Arg};
 use fasttext::FastText;
 
@@ -46,16 +46,8 @@ fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<Str
     (labels, probs)
 }
 
-#[post("/predict", data = "<texts>")]
-fn predict_without_option(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>)
-    -> Json<Vec<(Vec<String>, Vec<f32>)>>
-{
-    // XXX: https://github.com/SergioBenitez/Rocket/issues/376
-    predict(worker_count, model, texts, Default::default())
-}
-
-#[post("/predict?<options>", data = "<texts>")]
-fn predict(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>, options: PredictOptions)
+#[post("/predict?<options..>", data = "<texts>")]
+fn predict(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>, options: Form<PredictOptions>)
     -> Json<Vec<(Vec<String>, Vec<f32>)>>
 {
     let k = options.k.unwrap_or(1);
@@ -130,10 +122,10 @@ fn main() {
     fasttext.load_model(model_path);
     rocket::ignite()
         .manage(fasttext)
-        .attach(AdHoc::on_attach(|rocket| {
+        .attach(AdHoc::on_attach("rocket-worker-count", |rocket| {
             let workers = rocket.config().workers;
             Ok(rocket.manage(RocketWorkerCount(workers)))
         }))
-        .mount("/", routes![predict, predict_without_option])
+        .mount("/", routes![predict])
         .launch();
 }
