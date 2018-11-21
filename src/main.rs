@@ -119,7 +119,7 @@ fn main() {
         env::set_var("ROCKET_WORKERS", workers);
     }
     let mut fasttext = FastText::new();
-    fasttext.load_model(model_path);
+    fasttext.load_model(model_path).expect("Failed to load fastText model");
     rocket::ignite()
         .manage(fasttext)
         .attach(AdHoc::on_attach("rocket-worker-count", |rocket| {
