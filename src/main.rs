@@ -71,6 +71,18 @@ fn predict(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts
     Json(ret)
 }
 
+fn server(model_path: &str) -> rocket::Rocket {
+    let mut fasttext = FastText::new();
+    fasttext.load_model(model_path).expect("Failed to load fastText model");
+    rocket::ignite()
+        .manage(fasttext)
+        .attach(AdHoc::on_attach("rocket-worker-count", |rocket| {
+            let workers = rocket.config().workers;
+            Ok(rocket.manage(RocketWorkerCount(workers)))
+        }))
+        .mount("/", routes![predict])
+}
+
 fn main() {
     let matches = App::new("fasttext-serving")
         .version(env!("CARGO_PKG_VERSION"))
@@ -118,14 +130,36 @@ fn main() {
     if let Some(workers) = matches.value_of("workers") {
         env::set_var("ROCKET_WORKERS", workers);
     }
-    let mut fasttext = FastText::new();
-    fasttext.load_model(model_path).expect("Failed to load fastText model");
-    rocket::ignite()
-        .manage(fasttext)
-        .attach(AdHoc::on_attach("rocket-worker-count", |rocket| {
-            let workers = rocket.config().workers;
-            Ok(rocket.manage(RocketWorkerCount(workers)))
-        }))
-        .mount("/", routes![predict])
-        .launch();
+    server(model_path).launch();
+}
+
+#[cfg(test)]
+mod test {
+    use rocket::local::Client;
+    use rocket::http::{Status, ContentType};
+    use super::server;
+
+    #[test]
+    fn test_predict_empty_input() {
+        let client = Client::new(server("models/cooking.model.bin")).unwrap();
+        let mut res = client.post("/predict")
+            .header(ContentType::JSON)
+            .body(r#"[]"#)
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let body = res.body().unwrap().into_string().unwrap();
+        assert_eq!("[]", body);
+    }
+
+    #[test]
+    fn test_predict() {
+        let client = Client::new(server("models/cooking.model.bin")).unwrap();
+        let mut res = client.post("/predict")
+            .header(ContentType::JSON)
+            .body(r#"["Which baking dish is best to bake a banana bread?"]"#)
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let body = res.body().unwrap().into_string().unwrap();
+        assert!(body.contains("baking"));
+    }
 }
