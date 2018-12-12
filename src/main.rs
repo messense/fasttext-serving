@@ -31,11 +31,11 @@ fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<Str
     // NOTE: text needs to end in a newline
     // to exactly mimic the behavior of the cli
     let preds = if text.ends_with('\n') {
-        model.predict(text, k as i32, threshold).unwrap()
+        model.predict(text, k as i32, threshold).expect("predict failed")
     } else {
         let mut text = text.to_string();
         text.push('\n');
-        model.predict(&text, k as i32, threshold).unwrap()
+        model.predict(&text, k as i32, threshold).expect("predict failed")
     };
     let mut labels = Vec::with_capacity(preds.len());
     let mut probs = Vec::with_capacity(preds.len());
