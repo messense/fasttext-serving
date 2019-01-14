@@ -40,7 +40,7 @@ fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<Str
     let mut labels = Vec::with_capacity(preds.len());
     let mut probs = Vec::with_capacity(preds.len());
     for pred in &preds {
-        labels.push(pred.label.trim_left_matches("__label__").to_string());
+        labels.push(pred.label.trim_start_matches("__label__").to_string());
         probs.push(pred.prob);
     }
     (labels, probs)
