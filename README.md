@@ -23,6 +23,7 @@ USAGE:
     fasttext-serving [OPTIONS] --model <model>
 
 FLAGS:
+        --grpc       Serving gRPC API instead of HTTP API
     -h, --help       Prints help information
     -V, --version    Prints version information
 
@@ -32,6 +33,8 @@ OPTIONS:
     -p, --port <port>          Listen port [default: 8000]
     -w, --workers <workers>    Worker thread count, defaults to CPU count
 ```
+
+### Serve HTTP REST API
 
 Please refer to [Rocket documentation](https://rocket.rs/guide/configuration/#configuration) for configuration.
 
@@ -51,6 +54,12 @@ $ curl -X POST \
      'http://localhost:8000/predict'
 [[["baking"],[0.7152988]],[["equipment"],[0.73479545]]]
 ```
+
+### Serve gRPC API
+
+Run the command with `--grpc` to serve gRPC API instead of HTTP REST API.
+
+Please refer to gRPC Python client documentation [here](./python).
 
 ## License
 
