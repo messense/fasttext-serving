@@ -11,7 +11,7 @@ with open(readme, encoding='utf-8') as f:
 
 setup(
     name='fasttext-serving',
-    version='0.0.0',
+    version='0.1.0',
     author='messense',
     author_email='messense@icloud.com',
     url='https://github.com/messense/fasttext-serving',
