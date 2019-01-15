@@ -11,13 +11,14 @@ with open(readme, encoding='utf-8') as f:
 
 setup(
     name='fasttext-serving',
-    version='0.1.0',
+    version='0.1.1',
     author='messense',
     author_email='messense@icloud.com',
     url='https://github.com/messense/fasttext-serving',
     packages=find_packages(exclude=('tests', 'tests.*')),
     description='fasttext-serving gRPC client',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     install_requires=['grpcio'],
     include_package_data=True,
     classifiers=[
