@@ -88,3 +88,46 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: 
     }
     let _ = server.shutdown().wait();
 }
+
+#[cfg(test)]
+mod test {
+    use std::sync::Arc;
+    use grpcio::{Environment, ChannelBuilder, WriteFlags};
+    use fasttext::FastText;
+    use futures::{future, Future, Sink};
+    use super::predict::PredictRequest;
+    use super::predict_grpc::FasttextServingClient;
+    use super::start_server;
+
+    #[test]
+    fn test_grpc_predict() {
+        let mut fasttext = FastText::new();
+        fasttext.load_model("models/cooking.model.bin").expect("Failed to load fastText model");
+        let server = start_server(fasttext, "127.0.0.1", 0, 1);
+        let port = server.bind_addrs()[0].1;
+        let env = Arc::new(Environment::new(1));
+        let channel = ChannelBuilder::new(env).connect(&format!("127.0.0.1:{}", port));
+        let client = FasttextServingClient::new(channel);
+
+        let (mut sink, receiver) = client.predict().unwrap();
+
+        let mut req = PredictRequest::new();
+        req.set_text("Which baking dish is best to bake a banana bread?".to_string());
+        sink = sink
+            .send((req, WriteFlags::default()))
+            .wait()
+            .unwrap();
+        // flush
+        future::poll_fn(|| sink.close()).wait().unwrap();
+        let res = receiver.wait().unwrap();
+        let preds = res.get_predictions();
+        assert_eq!(1, preds.len());
+        let pred = &preds[0];
+        let labels = pred.get_labels();
+        let probs = pred.get_probs();
+        assert_eq!(1, labels.len());
+        assert_eq!(1, probs.len());
+        assert_eq!("baking", &labels[0]);
+        assert!(*&probs[0] > 0.7);
+    }
+}
