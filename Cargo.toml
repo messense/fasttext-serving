@@ -3,6 +3,7 @@ name = "fasttext-serving"
 version = "0.3.1"
 authors = ["Messense Lv <messense@icloud.com>"]
 description = "fastText model serving API server"
+edition = "2018"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/messense/fasttext-serving.git"
@@ -27,6 +28,14 @@ rocket_contrib = { version = "0.4.0", default-features = false, features = ["jso
 fasttext = "0.4"
 clap = "2.30"
 rayon = "1.0"
+futures = "0.1.23"
+grpcio = { version = "0.4", default-features = false, features = ["protobuf-codec"] }
+grpcio-proto = "0.4.0"
+protobuf = "~2.0"
+log = "0.4.4"
+pretty_env_logger = "0.2.4"
+ctrlc = { version = "3.0", features = ["termination"] }
+num_cpus = "1.8.0"
 
 [profile.release]
 lto = true

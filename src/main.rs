@@ -5,27 +5,25 @@ extern crate rocket_contrib;
 extern crate clap;
 extern crate rayon;
 extern crate fasttext;
+extern crate futures;
+extern crate protobuf;
+extern crate grpcio;
+extern crate grpcio_proto;
+extern crate pretty_env_logger;
+#[macro_use] extern crate log;
+extern crate ctrlc;
+extern crate num_cpus;
 
 use std::env;
 use std::path::Path;
-use rayon::prelude::*;
-use rocket::State;
-use rocket::request::Form;
-use rocket::fairing::AdHoc;
-use rocket_contrib::json::Json;
 use clap::{App, Arg};
 use fasttext::FastText;
 
-#[derive(FromForm, Debug, Default)]
-struct PredictOptions {
-    k: Option<u32>,
-    threshold: Option<f32>,
-}
-
-struct RocketWorkerCount(u16);
+mod http;
+mod grpc;
 
 #[inline]
-fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<String>, Vec<f32>) {
+pub fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<String>, Vec<f32>) {
     // Ensure k >= 1
     let k = if k > 0 { k } else { 1 };
     // NOTE: text needs to end in a newline
@@ -46,44 +44,13 @@ fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<Str
     (labels, probs)
 }
 
-#[post("/predict?<options..>", data = "<texts>")]
-fn predict(worker_count: State<RocketWorkerCount>, model: State<FastText>, texts: Json<Vec<String>>, options: Form<PredictOptions>)
-    -> Json<Vec<(Vec<String>, Vec<f32>)>>
-{
-    let k = options.k.unwrap_or(1);
-    let threshold = options.threshold.unwrap_or(0.0);
-    let text_count = texts.len();
-    let worker_count = worker_count.inner().0 as usize;
-    let ret: Vec<(Vec<String>, Vec<f32>)> = match text_count {
-        0 => Vec::new(),
-        1 => vec![predict_one(model.inner(), &texts[0], k, threshold)],
-        n if n > 1 && n <= worker_count => {
-            texts.par_iter().map(|txt| {
-                predict_one(model.inner(), txt, k, threshold)
-            }).collect()
-        },
-        _ => {
-            texts.iter().map(|txt| {
-                predict_one(model.inner(), txt, k, threshold)
-            }).collect()
-        }
-    };
-    Json(ret)
-}
-
-fn server(model_path: &str) -> rocket::Rocket {
-    let mut fasttext = FastText::new();
-    fasttext.load_model(model_path).expect("Failed to load fastText model");
-    rocket::ignite()
-        .manage(fasttext)
-        .attach(AdHoc::on_attach("rocket-worker-count", |rocket| {
-            let workers = rocket.config().workers;
-            Ok(rocket.manage(RocketWorkerCount(workers)))
-        }))
-        .mount("/", routes![predict])
-}
-
 fn main() {
+    if env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "fasttext_serving=info");
+    }
+    pretty_env_logger::init();
+
+    let num_threads = num_cpus::get().to_string();
     let matches = App::new("fasttext-serving")
         .version(env!("CARGO_PKG_VERSION"))
         .about("fastText model serving service")
@@ -111,55 +78,34 @@ fn main() {
                  .short("w")
                  .long("workers")
                  .alias("concurrency")
+                 .alias("threads")
+                 .default_value(&num_threads)
                  .takes_value(true)
                  .help("Worker thread count, defaults to CPU count"))
+        .arg(Arg::with_name("grpc")
+                 .long("grpc")
+                 .help("Serving gRPC API instead of HTTP API"))
         .get_matches();
     let model_path = matches.value_of("model").unwrap();
     if !Path::new(model_path).exists() {
         panic!(format!("Error: model {} does not exists", model_path));
     }
-    if env::var("ROCKET_ENV").is_err() {
-        env::set_var("ROCKET_ENV", "prod");
-    }
-    if let Some(address) = matches.value_of("address") {
+    let address = matches.value_of("address").expect("missing address");
+    let port = matches.value_of("port").expect("missing port");
+    let workers = matches.value_of("workers").expect("missing workers");
+    let mut model = FastText::new();
+    model.load_model(model_path).expect("Failed to load fastText model");
+    if !matches.is_present("grpc") {
+        if env::var("ROCKET_ENV").is_err() {
+            env::set_var("ROCKET_ENV", "prod");
+        }
         env::set_var("ROCKET_ADDRESS", address);
-    }
-    if let Some(port) = matches.value_of("port") {
         env::set_var("ROCKET_PORT", port);
-    }
-    if let Some(workers) = matches.value_of("workers") {
         env::set_var("ROCKET_WORKERS", workers);
-    }
-    server(model_path).launch();
-}
-
-#[cfg(test)]
-mod test {
-    use rocket::local::Client;
-    use rocket::http::{Status, ContentType};
-    use super::server;
-
-    #[test]
-    fn test_predict_empty_input() {
-        let client = Client::new(server("models/cooking.model.bin")).unwrap();
-        let mut res = client.post("/predict")
-            .header(ContentType::JSON)
-            .body(r#"[]"#)
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let body = res.body().unwrap().into_string().unwrap();
-        assert_eq!("[]", body);
-    }
-
-    #[test]
-    fn test_predict() {
-        let client = Client::new(server("models/cooking.model.bin")).unwrap();
-        let mut res = client.post("/predict")
-            .header(ContentType::JSON)
-            .body(r#"["Which baking dish is best to bake a banana bread?"]"#)
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let body = res.body().unwrap().into_string().unwrap();
-        assert!(body.contains("baking"));
+        crate::http::server(model).launch();
+    } else {
+        let port: u16 = port.parse().expect("invalid port");
+        let workers: usize = workers.parse().expect("invalid workers");
+        crate::grpc::runserver(model, address, port, workers);
     }
 }

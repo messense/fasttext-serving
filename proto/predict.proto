@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+package fasttext_serving;
+
+service FasttextServing {
+   rpc predict(stream PredictRequest) returns (PredictResponse) {}
+}
+
+message PredictRequest {
+    required string text = 1;
+    optional uint32 k = 2 [default = 1];
+    optional float threshold = 3 [default = 0.0];
+}
+
+message Prediction {
+    repeated string labels = 1;
+    repeated float probs = 2;
+}
+
+message PredictResponse {
+    repeated Prediction predictions = 1;
+}
