@@ -47,7 +47,7 @@ impl FasttextServing for FasttextServingService {
             })
             .map_err(|e| match e {
                 grpcio::Error::RemoteStopped => {},
-                _ => error!("Failed to predict: {:?}", e),
+                _ => log::error!("Failed to predict: {:?}", e),
             });
         ctx.spawn(f)
     }
@@ -76,7 +76,7 @@ fn start_server(model: FastText, address: &str, port: u16, num_threads: usize) -
 pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: usize) {
     let mut server = start_server(model, address, port, num_threads);
     for &(ref host, port) in server.bind_addrs() {
-        info!("Listening on {}:{}", host, port);
+        log::info!("Listening on {}:{}", host, port);
     }
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();

@@ -1,19 +1,5 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
-extern crate rocket_contrib;
-extern crate clap;
-extern crate rayon;
-extern crate fasttext;
-extern crate futures;
-extern crate protobuf;
-extern crate grpcio;
-extern crate grpcio_proto;
-extern crate pretty_env_logger;
-#[macro_use] extern crate log;
-extern crate ctrlc;
-extern crate num_cpus;
-
 use std::env;
 use std::path::Path;
 use clap::{App, Arg};
