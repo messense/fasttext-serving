@@ -8,6 +8,9 @@ use fasttext::FastText;
 mod http;
 mod grpc;
 
+#[global_allocator]
+static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 #[inline]
 pub fn predict_one(model: &FastText, text: &str, k: u32, threshold: f32) -> (Vec<String>, Vec<f32>) {
     // Ensure k >= 1

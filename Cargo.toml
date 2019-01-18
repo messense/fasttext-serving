@@ -36,6 +36,7 @@ log = "0.4.4"
 pretty_env_logger = "0.2.4"
 ctrlc = { version = "3.0", features = ["termination"] }
 num_cpus = "1.8.0"
+jemallocator = { version = "0.1.9", features= ["unprefixed_malloc_on_supported_platforms"] }
 
 [profile.release]
 lto = true
