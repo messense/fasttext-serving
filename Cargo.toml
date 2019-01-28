@@ -30,8 +30,7 @@ clap = "2.30"
 rayon = "1.0"
 futures = "0.1.23"
 grpcio = { version = "0.4", default-features = false, features = ["protobuf-codec"] }
-grpcio-proto = "0.4.0"
-protobuf = "~2.0"
+protobuf = "2.2"
 log = "0.4.4"
 pretty_env_logger = "0.2.4"
 ctrlc = { version = "3.0", features = ["termination"] }
