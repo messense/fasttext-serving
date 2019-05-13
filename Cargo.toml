@@ -23,8 +23,8 @@ assets = [
 ]
 
 [dependencies]
-rocket = "0.4.0"
-rocket_contrib = { version = "0.4.0", default-features = false, features = ["json"] }
+rocket = "0.4.1"
+rocket_contrib = { version = "0.4.1", default-features = false, features = ["json"] }
 fasttext = "0.4"
 clap = "2.30"
 rayon = "1.0"
