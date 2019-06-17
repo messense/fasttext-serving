@@ -36,8 +36,6 @@ OPTIONS:
 
 ### Serve HTTP REST API
 
-Please refer to [Rocket documentation](https://rocket.rs/guide/configuration/#configuration) for configuration.
-
 HTTP API endpoint:
 
 ```
