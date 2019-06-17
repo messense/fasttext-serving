@@ -9,7 +9,6 @@ parts:
   fasttext-serving:
     plugin: rust
     source: .
-    rust-channel: nightly
 apps:
   fasttext-serving:
     command: env PATH=$SNAP/bin:$PATH fasttext-serving
