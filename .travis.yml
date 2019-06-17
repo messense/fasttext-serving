@@ -1,7 +1,7 @@
 sudo: required
 language: rust
 rust:
-  - nightly
+  - stable
 cache: cargo
 script:
   - cargo build
@@ -9,7 +9,7 @@ script:
 
 after_success:
   - |
-    if [[ "${TRAVIS_TAG:-}" != "" && "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "nightly" ]]; then
+    if [[ "${TRAVIS_TAG:-}" != "" && "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
       CARGO_INCREMENTAL=0 cargo build --release;
       cargo install --force cargo-deb;
       cargo deb --no-build --no-strip;
