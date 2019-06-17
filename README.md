@@ -49,7 +49,7 @@ Post data should be JSON array of string, for example `["abc", "def"]`
 CURL example:
 
 ```bash
-$ curl -X POST \
+$ curl -X POST -H 'Content-Type: application/json' \
      --data "[\"Which baking dish is best to bake a banana bread?\", \"Why not put knives in the dishwasher?\"]" \
      'http://localhost:8000/predict'
 [[["baking"],[0.7152988]],[["equipment"],[0.73479545]]]

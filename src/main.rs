@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-
 use std::env;
 use std::path::Path;
 use clap::{App, Arg};
@@ -84,17 +82,11 @@ fn main() {
     let workers = matches.value_of("workers").expect("missing workers");
     let mut model = FastText::new();
     model.load_model(model_path).expect("Failed to load fastText model");
-    if !matches.is_present("grpc") {
-        if env::var("ROCKET_ENV").is_err() {
-            env::set_var("ROCKET_ENV", "prod");
-        }
-        env::set_var("ROCKET_ADDRESS", address);
-        env::set_var("ROCKET_PORT", port);
-        env::set_var("ROCKET_WORKERS", workers);
-        crate::http::server(model).launch();
-    } else {
-        let port: u16 = port.parse().expect("invalid port");
-        let workers: usize = workers.parse().expect("invalid workers");
+    let port: u16 = port.parse().expect("invalid port");
+    let workers: usize = workers.parse().expect("invalid workers");
+    if matches.is_present("grpc") {
         crate::grpc::runserver(model, address, port, workers);
+    } else {
+        crate::http::runserver(model, address, port, workers);
     }
 }
