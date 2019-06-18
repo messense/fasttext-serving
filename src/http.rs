@@ -28,6 +28,7 @@ fn predict(model: web::Data<FastText>, texts: web::Json<Vec<String>>, options: w
 }
 
 pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usize) {
+    log::info!("Listening on {}:{}", address, port);
     let model_data = web::Data::new(model);
     HttpServer::new(move || {
         App::new()
