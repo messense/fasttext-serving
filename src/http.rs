@@ -35,8 +35,8 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
             .service(
                 web::resource("/predict")
                     .data(web::Json::<Vec<String>>::configure(|cfg| {
-                        // Accpet any content type
-                        cfg.content_type(|_mime| true)
+                        cfg.limit(20_971_520)  // 20MB
+                           .content_type(|_mime| true)  // Accept any content type
                     }))
                     .route(web::post().to(predict))
             )
