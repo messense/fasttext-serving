@@ -38,4 +38,3 @@ serde = { version = "1.0.92", features = ["derive"] }
 
 [profile.release]
 lto = true
-debug = true
