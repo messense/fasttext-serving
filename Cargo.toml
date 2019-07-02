@@ -27,7 +27,7 @@ fasttext = "0.4"
 clap = "2.30"
 futures = "0.1.23"
 grpcio = { version = "0.4", default-features = false, features = ["protobuf-codec"] }
-protobuf = "2.2"
+protobuf = "2.7"
 log = "0.4.4"
 pretty_env_logger = "0.3.0"
 ctrlc = { version = "3.0", features = ["termination"] }
