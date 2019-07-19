@@ -538,7 +538,7 @@ dependencies = [
 
 [[package]]
 name = "fasttext-serving"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "actix-web 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
