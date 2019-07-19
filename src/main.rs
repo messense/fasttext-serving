@@ -3,7 +3,9 @@ use std::path::Path;
 use clap::{App, Arg};
 use fasttext::FastText;
 
+#[cfg(feature = "http")]
 mod http;
+#[cfg(feature = "grpc")]
 mod grpc;
 
 #[global_allocator]
@@ -85,8 +87,14 @@ fn main() {
     let port: u16 = port.parse().expect("invalid port");
     let workers: usize = workers.parse().expect("invalid workers");
     if matches.is_present("grpc") {
+        #[cfg(feature = "grpc")]
         crate::grpc::runserver(model, address, port, workers);
+        #[cfg(not(feature = "grpc"))]
+        panic!("gRPC support is not enabled!")
     } else {
+        #[cfg(feature = "http")]
         crate::http::runserver(model, address, port, workers);
+        #[cfg(not(feature = "http"))]
+        panic!("HTTP support is not enabled!")
     }
 }
