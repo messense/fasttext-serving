@@ -1,8 +1,51 @@
+use std::fmt;
+use std::io;
+use std::str::FromStr;
+
 use fasttext::FastText;
 use serde::Deserialize;
 use actix_web::{web, App, HttpServer, FromRequest};
 
 use crate::predict_one;
+
+const UNIX_PREFIX: &'static str = "unix:";
+
+enum Address {
+    IpPort(String, u16),
+    Unix(String),
+}
+
+impl From<(&str, u16)> for Address {
+    fn from(addr: (&str, u16)) -> Self {
+        addr.0
+            .parse::<Address>()
+            .unwrap_or_else(|_| Address::IpPort(addr.0.to_string(), addr.1))
+    }
+}
+
+impl FromStr for Address {
+    type Err = io::Error;
+
+    fn from_str(string: &str) -> io::Result<Self> {
+        #[cfg(unix)]
+        {
+            if string.starts_with(UNIX_PREFIX) {
+                let address = &string[UNIX_PREFIX.len()..];
+                return Ok(Address::Unix(address.into()));
+            }
+        }
+        Err(io::Error::new(io::ErrorKind::Other, "failed to resolve TCP address"))
+    }
+}
+
+impl fmt::Display for Address {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Address::IpPort(ip, port) => write!(f, "{}:{}", ip, port),
+            Address::Unix(path) => write!(f, "{}{}", UNIX_PREFIX, path),
+        }
+    }
+}
 
 #[derive(Deserialize, Debug, Default)]
 struct PredictOptions {
@@ -28,9 +71,10 @@ fn predict(model: web::Data<FastText>, texts: web::Json<Vec<String>>, options: w
 }
 
 pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usize) {
-    log::info!("Listening on {}:{}", address, port);
+    let addr = Address::from((address, port));
+    log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
-    HttpServer::new(move || {
+    let mut server = HttpServer::new(move || {
         App::new()
             .register_data(model_data.clone())
             .service(
@@ -42,11 +86,17 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
                     .route(web::post().to(predict))
             )
         })
-        .workers(workers)
-        .bind((address, port))
-        .expect("bind failed")
-        .run()
-        .expect("run failed");
+        .workers(workers);
+
+    server = match addr {
+        Address::IpPort(address, port) => {
+            server.bind((&address[..], port)).expect("bind failed")
+        }
+        Address::Unix(path) => {
+            server.bind_uds(path).expect("bind failed")
+        }
+    };
+    server.run().expect("run failed");
 }
 
 #[cfg(test)]
