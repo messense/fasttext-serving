@@ -3,7 +3,7 @@
 
 // https://github.com/Manishearth/rust-clippy/issues/702
 #![allow(unknown_lints)]
-#![allow(clippy)]
+#![allow(clippy::all)]
 
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
@@ -55,7 +55,7 @@ pub trait FasttextServing {
 
 pub fn create_fasttext_serving<S: FasttextServing + Send + Clone + 'static>(s: S) -> ::grpcio::Service {
     let mut builder = ::grpcio::ServiceBuilder::new();
-    let mut instance = s.clone();
+    let mut instance = s;
     builder = builder.add_client_streaming_handler(&METHOD_FASTTEXT_SERVING_PREDICT, move |ctx, req, resp| {
         instance.predict(ctx, req, resp)
     });
