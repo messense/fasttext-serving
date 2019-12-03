@@ -26,7 +26,7 @@ assets = [
 fasttext = "0.4"
 clap = "2.30"
 futures = { version = "0.1.23", optional = true }
-grpcio = { version = "0.4", default-features = false, features = ["protobuf-codec"], optional = true }
+grpcio = { version = "0.5.0-alpha.5", default-features = false, features = ["protobuf-codec"], optional = true }
 protobuf = {version = "2.8", optional = true }
 log = "0.4.4"
 pretty_env_logger = "0.3.0"
