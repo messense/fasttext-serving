@@ -53,7 +53,7 @@ struct PredictOptions {
     threshold: Option<f32>,
 }
 
-fn predict(model: web::Data<FastText>, texts: web::Json<Vec<String>>, options: web::Query<PredictOptions>)
+async fn predict(model: web::Data<FastText>, texts: web::Json<Vec<String>>, options: web::Query<PredictOptions>)
     -> web::Json<Vec<(Vec<String>, Vec<f32>)>>
 {
     let k = options.k.unwrap_or(1);
