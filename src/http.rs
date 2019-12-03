@@ -2,9 +2,9 @@ use std::fmt;
 use std::io;
 use std::str::FromStr;
 
+use actix_web::{web, App, FromRequest, HttpServer};
 use fasttext::FastText;
 use serde::Deserialize;
-use actix_web::{web, App, HttpServer, FromRequest};
 
 use crate::predict_one;
 
@@ -34,7 +34,10 @@ impl FromStr for Address {
                 return Ok(Address::Unix(address.into()));
             }
         }
-        Err(io::Error::new(io::ErrorKind::Other, "failed to resolve TCP address"))
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "failed to resolve TCP address",
+        ))
     }
 }
 
@@ -53,19 +56,20 @@ struct PredictOptions {
     threshold: Option<f32>,
 }
 
-async fn predict(model: web::Data<FastText>, texts: web::Json<Vec<String>>, options: web::Query<PredictOptions>)
-    -> web::Json<Vec<(Vec<String>, Vec<f32>)>>
-{
+async fn predict(
+    model: web::Data<FastText>,
+    texts: web::Json<Vec<String>>,
+    options: web::Query<PredictOptions>,
+) -> web::Json<Vec<(Vec<String>, Vec<f32>)>> {
     let k = options.k.unwrap_or(1);
     let threshold = options.threshold.unwrap_or(0.0);
     let text_count = texts.len();
     let ret: Vec<(Vec<String>, Vec<f32>)> = match text_count {
         0 => Vec::new(),
-        _ => {
-            texts.iter().map(|txt| {
-                predict_one(model.get_ref(), txt, k, threshold)
-            }).collect()
-        }
+        _ => texts
+            .iter()
+            .map(|txt| predict_one(model.get_ref(), txt, k, threshold))
+            .collect(),
     };
     web::Json(ret)
 }
@@ -75,69 +79,73 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
     let mut server = HttpServer::new(move || {
-        App::new()
-            .register_data(model_data.clone())
-            .service(
-                web::resource("/predict")
-                    .data(web::Json::<Vec<String>>::configure(|cfg| {
-                        cfg.limit(20_971_520)  // 20MB
-                           .content_type(|_mime| true)  // Accept any content type
-                    }))
-                    .route(web::post().to(predict))
-            )
-        })
-        .workers(workers);
+        App::new().register_data(model_data.clone()).service(
+            web::resource("/predict")
+                .data(web::Json::<Vec<String>>::configure(|cfg| {
+                    cfg.limit(20_971_520) // 20MB
+                        .content_type(|_mime| true) // Accept any content type
+                }))
+                .route(web::post().to(predict)),
+        )
+    })
+    .workers(workers);
 
     server = match addr {
-        Address::IpPort(address, port) => {
-            server.bind((&address[..], port)).expect("bind failed")
-        }
-        Address::Unix(path) => {
-            server.bind_uds(path).expect("bind failed")
-        }
+        Address::IpPort(address, port) => server.bind((&address[..], port)).expect("bind failed"),
+        Address::Unix(path) => server.bind_uds(path).expect("bind failed"),
     };
     server.run().expect("run failed");
 }
 
 #[cfg(test)]
 mod test {
-    use fasttext::FastText;
-    use actix_web::{web, App};
+    use super::predict;
     use actix_web::http::StatusCode;
     use actix_web::test::{call_service, init_service, TestRequest};
-    use super::predict;
+    use actix_web::{web, App};
+    use fasttext::FastText;
 
-    #[test]
-    fn test_predict_empty_input() {
+    #[actix_rt::test]
+    async fn test_predict_empty_input() {
         let mut fasttext = FastText::new();
-        fasttext.load_model("models/cooking.model.bin").expect("Failed to load fastText model");
+        fasttext
+            .load_model("models/cooking.model.bin")
+            .expect("Failed to load fastText model");
         let model_data = web::Data::new(fasttext);
         let mut srv = init_service(
             App::new()
                 .register_data(model_data)
-                .service(web::resource("/predict").route(web::post().to(predict))
-            )
-        );
+                .service(web::resource("/predict").route(web::post().to(predict))),
+        )
+        .await;
         let data: Vec<String> = Vec::new();
-        let req = TestRequest::post().uri("/predict").set_json(&data).to_request();
-        let resp = call_service(&mut srv, req);
+        let req = TestRequest::post()
+            .uri("/predict")
+            .set_json(&data)
+            .to_request();
+        let resp = call_service(&mut srv, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    #[test]
-    fn test_predict() {
+    #[actix_rt::test]
+    async fn test_predict() {
         let mut fasttext = FastText::new();
-        fasttext.load_model("models/cooking.model.bin").expect("Failed to load fastText model");
+        fasttext
+            .load_model("models/cooking.model.bin")
+            .expect("Failed to load fastText model");
         let model_data = web::Data::new(fasttext);
         let mut srv = init_service(
             App::new()
                 .register_data(model_data)
-                .service(web::resource("/predict").route(web::post().to(predict))
-            )
-        );
+                .service(web::resource("/predict").route(web::post().to(predict))),
+        )
+        .await;
         let data = vec!["Which baking dish is best to bake a banana bread?"];
-        let req = TestRequest::post().uri("/predict").set_json(&data).to_request();
-        let resp = call_service(&mut srv, req);
+        let req = TestRequest::post()
+            .uri("/predict")
+            .set_json(&data)
+            .to_request();
+        let resp = call_service(&mut srv, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
     }
 }

@@ -1,11 +1,14 @@
-use std::thread;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
 use std::time::Duration;
 
-use futures::{Future, Stream};
-use grpcio::{RpcContext, Environment, Server, ServerBuilder, ChannelBuilder, RequestStream, ClientStreamingSink};
 use fasttext::FastText;
+use futures::{Future, Stream};
+use grpcio::{
+    ChannelBuilder, ClientStreamingSink, Environment, RequestStream, RpcContext, Server,
+    ServerBuilder,
+};
 
 mod predict;
 mod predict_grpc;
@@ -20,7 +23,12 @@ pub struct FasttextServingService {
 }
 
 impl FasttextServing for FasttextServingService {
-    fn predict(&mut self, ctx: RpcContext, stream: RequestStream<PredictRequest>, sink: ClientStreamingSink<PredictResponse>) {
+    fn predict(
+        &mut self,
+        ctx: RpcContext,
+        stream: RequestStream<PredictRequest>,
+        sink: ClientStreamingSink<PredictResponse>,
+    ) {
         let model = self.model.clone();
         let f = stream
             .fold(Vec::new(), move |mut preds, req| {
@@ -46,7 +54,7 @@ impl FasttextServing for FasttextServingService {
                 sink.success(resp)
             })
             .map_err(|e| match e {
-                grpcio::Error::RemoteStopped => {},
+                grpcio::Error::RemoteStopped => {}
                 _ => log::error!("Failed to predict: {:?}", e),
             });
         ctx.spawn(f)
@@ -60,8 +68,8 @@ fn start_server(model: FastText, address: &str, port: u16, num_threads: usize) -
     let service = self::predict_grpc::create_fasttext_serving(instance);
     let env = Arc::new(Environment::new(num_threads));
     let channel_args = ChannelBuilder::new(Arc::clone(&env))
-        .max_receive_message_len(20_971_520)  // 20MB
-        .max_send_message_len(10_485_760)  // 10MB
+        .max_receive_message_len(20_971_520) // 20MB
+        .max_send_message_len(10_485_760) // 10MB
         .build_args();
     let mut server = ServerBuilder::new(env)
         .channel_args(channel_args)
@@ -82,7 +90,8 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: 
     let r = running.clone();
     ctrlc::set_handler(move || {
         r.store(false, Ordering::SeqCst);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
     while running.load(Ordering::SeqCst) {
         thread::sleep(Duration::from_millis(100));
     }
@@ -91,18 +100,20 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: 
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-    use grpcio::{Environment, ChannelBuilder, WriteFlags};
-    use fasttext::FastText;
-    use futures::{future, Future, Sink};
     use super::predict::PredictRequest;
     use super::predict_grpc::FasttextServingClient;
     use super::start_server;
+    use fasttext::FastText;
+    use futures::{future, Future, Sink};
+    use grpcio::{ChannelBuilder, Environment, WriteFlags};
+    use std::sync::Arc;
 
     #[test]
     fn test_grpc_predict() {
         let mut fasttext = FastText::new();
-        fasttext.load_model("models/cooking.model.bin").expect("Failed to load fastText model");
+        fasttext
+            .load_model("models/cooking.model.bin")
+            .expect("Failed to load fastText model");
         let server = start_server(fasttext, "127.0.0.1", 0, 1);
         let port = server.bind_addrs()[0].1;
         let env = Arc::new(Environment::new(1));
@@ -113,10 +124,7 @@ mod test {
 
         let mut req = PredictRequest::new();
         req.set_text("Which baking dish is best to bake a banana bread?".to_string());
-        sink = sink
-            .send((req, WriteFlags::default()))
-            .wait()
-            .unwrap();
+        sink = sink.send((req, WriteFlags::default())).wait().unwrap();
         // flush
         future::poll_fn(|| sink.close()).wait().unwrap();
         let res = receiver.wait().unwrap();

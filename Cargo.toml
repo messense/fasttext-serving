@@ -36,6 +36,9 @@ jemallocator = { version = "0.3.0", features= ["unprefixed_malloc_on_supported_p
 actix-web = { version = "2.0.0-alpha.2", default-features = false, optional = true }
 serde = { version = "1.0.92", features = ["derive"] }
 
+[dev-dependencies]
+actix-rt = "1.0.0-alpha.2"
+
 [features]
 default = ["http", "grpc"]
 http = ["actix-web"]
