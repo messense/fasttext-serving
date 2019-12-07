@@ -42,7 +42,7 @@ bytes = { version = "0.4", optional = true }
 actix-rt = "1.0.0-alpha.3"
 
 [build-dependencies]
-tonic-build = { git = "https://github.com/hyperium/tonic.git", branch = "master", optional = true }
+tonic-build = { git = "https://github.com/hyperium/tonic.git", branch = "master", default-features = false, features = ["transport"], optional = true }
 
 [features]
 default = ["http", "grpc"]
