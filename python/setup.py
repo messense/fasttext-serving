@@ -19,7 +19,7 @@ setup(
     description='fasttext-serving gRPC client',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires=['grpcio'],
+    install_requires=['grpcio', 'protobuf'],
     include_package_data=True,
     classifiers=[
         'Operating System :: MacOS',
