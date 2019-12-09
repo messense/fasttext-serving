@@ -29,7 +29,8 @@ log = "0.4.4"
 pretty_env_logger = "0.3.0"
 num_cpus = "1.8.0"
 jemallocator = { version = "0.3.0", features= ["unprefixed_malloc_on_supported_platforms"] }
-actix-web = { version = "2.0.0-alpha.3", default-features = false, optional = true }
+actix-web = { version = "2.0.0-alpha.4", default-features = false, optional = true }
+actix-rt = { version = "1.0.0-alpha.3", optional = true }
 serde = { version = "1.0.92", features = ["derive"] }
 # grpc dependencies
 prost = { version = "0.5", optional = true }
@@ -38,15 +39,12 @@ futures = { version = "0.3", default-features = false, features = ["alloc"], opt
 tokio = { version = "0.2", features = ["rt-threaded", "time", "stream", "macros"], optional = true }
 bytes = { version = "0.4", optional = true }
 
-[dev-dependencies]
-actix-rt = "1.0.0-alpha.3"
-
 [build-dependencies]
 tonic-build = { git = "https://github.com/hyperium/tonic.git", branch = "master", default-features = false, features = ["transport"], optional = true }
 
 [features]
 default = ["http", "grpc"]
-http = ["actix-web"]
+http = ["actix-web", "actix-rt"]
 grpc = ["tonic", "tokio", "futures", "prost", "bytes", "tonic-build"]
 
 [profile.release]

@@ -3,6 +3,7 @@ use std::io;
 use std::str::FromStr;
 
 use actix_web::{web, App, FromRequest, HttpServer};
+use actix_rt::System;
 use fasttext::FastText;
 use serde::Deserialize;
 
@@ -90,11 +91,13 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     })
     .workers(workers);
 
+    let sys = System::new("http-server");
     server = match addr {
         Address::IpPort(address, port) => server.bind((&address[..], port)).expect("bind failed"),
         Address::Unix(path) => server.bind_uds(path).expect("bind failed"),
     };
-    server.run().expect("run failed");
+    server.start();
+    sys.run().expect("run failed");
 }
 
 #[cfg(test)]
