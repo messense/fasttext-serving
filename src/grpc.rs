@@ -1,10 +1,10 @@
+use std::net::ToSocketAddrs;
 use std::sync::Arc;
-use std::net::{ToSocketAddrs};
 
 use fasttext::FastText;
 use futures::StreamExt;
-use tonic::{Request, Response, Status, Streaming};
 use tonic::transport::Server;
+use tonic::{Request, Response, Status, Streaming};
 
 use crate::predict_one;
 
@@ -13,16 +13,21 @@ mod fasttext_serving {
     tonic::include_proto!("fasttext_serving");
 }
 
-use fasttext_serving::{server, PredictRequest, PredictResponse, Prediction};
+use fasttext_serving::{
+    fasttextserving_server as server, PredictRequest, PredictResponse, Prediction,
+};
 
 #[derive(Debug, Clone)]
 struct FastTextServingService {
-    model: Arc<FastText>
+    model: Arc<FastText>,
 }
 
 #[tonic::async_trait]
 impl server::FasttextServing for FastTextServingService {
-    async fn predict(&self, request: Request<Streaming<PredictRequest>>) -> Result<Response<PredictResponse>, Status> {
+    async fn predict(
+        &self,
+        request: Request<Streaming<PredictRequest>>,
+    ) -> Result<Response<PredictResponse>, Status> {
         let stream = request.into_inner();
         futures::pin_mut!(stream);
         let model = self.model.clone();

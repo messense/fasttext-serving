@@ -2,8 +2,8 @@ use std::fmt;
 use std::io;
 use std::str::FromStr;
 
-use actix_web::{web, App, FromRequest, HttpServer};
 use actix_rt::System;
+use actix_web::{web, App, FromRequest, HttpServer};
 use fasttext::FastText;
 use serde::Deserialize;
 
