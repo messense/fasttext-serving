@@ -14,7 +14,7 @@ mod fasttext_serving {
 }
 
 use fasttext_serving::{
-    fasttextserving_server as server, PredictRequest, PredictResponse, Prediction,
+    fasttext_serving_server as server, PredictRequest, PredictResponse, Prediction,
 };
 
 #[derive(Debug, Clone)]
