@@ -55,7 +55,7 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: 
     tokio::runtime::Builder::new()
         .enable_all()
         .threaded_scheduler()
-        .num_threads(num_threads)
+        .core_threads(num_threads)
         .build()
         .unwrap()
         .block_on(async {

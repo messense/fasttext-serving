@@ -80,7 +80,7 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
     let mut server = HttpServer::new(move || {
-        App::new().register_data(model_data.clone()).service(
+        App::new().app_data(model_data.clone()).service(
             web::resource("/predict")
                 .data(web::Json::<Vec<String>>::configure(|cfg| {
                     cfg.limit(20_971_520) // 20MB
@@ -117,7 +117,7 @@ mod test {
         let model_data = web::Data::new(fasttext);
         let mut srv = init_service(
             App::new()
-                .register_data(model_data)
+                .app_data(model_data)
                 .service(web::resource("/predict").route(web::post().to(predict))),
         )
         .await;
@@ -139,7 +139,7 @@ mod test {
         let model_data = web::Data::new(fasttext);
         let mut srv = init_service(
             App::new()
-                .register_data(model_data)
+                .app_data(model_data)
                 .service(web::resource("/predict").route(web::post().to(predict))),
         )
         .await;
