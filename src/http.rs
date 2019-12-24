@@ -80,9 +80,10 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
     let mut server = HttpServer::new(move || {
-        App::new().app_data(model_data.clone()).service(
+        App::new().service(
             web::resource("/predict")
-                .data(web::Json::<Vec<String>>::configure(|cfg| {
+                .app_data(model_data.clone())
+                .app_data(web::Json::<Vec<String>>::configure(|cfg| {
                     cfg.limit(20_971_520) // 20MB
                         .content_type(|_mime| true) // Accept any content type
                 }))
