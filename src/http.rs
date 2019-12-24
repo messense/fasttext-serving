@@ -75,20 +75,45 @@ async fn predict(
     web::Json(ret)
 }
 
+async fn sentence_vector(
+    model: web::Data<FastText>,
+    texts: web::Json<Vec<String>>,
+) -> web::Json<Vec<Vec<f32>>> {
+    let text_count = texts.len();
+    let ret: Vec<Vec<f32>> = match text_count {
+        0 => Vec::new(),
+        _ => texts
+            .iter()
+            .map(|txt| model.get_sentence_vector(txt))
+            .collect(),
+    };
+    web::Json(ret)
+}
+
 pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usize) {
     let addr = Address::from((address, port));
     log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
     let mut server = HttpServer::new(move || {
-        App::new().service(
-            web::resource("/predict")
-                .app_data(model_data.clone())
-                .app_data(web::Json::<Vec<String>>::configure(|cfg| {
-                    cfg.limit(20_971_520) // 20MB
-                        .content_type(|_mime| true) // Accept any content type
-                }))
-                .route(web::post().to(predict)),
-        )
+        App::new()
+            .service(
+                web::resource("/predict")
+                    .app_data(model_data.clone())
+                    .app_data(web::Json::<Vec<String>>::configure(|cfg| {
+                        cfg.limit(20_971_520) // 20MB
+                            .content_type(|_mime| true) // Accept any content type
+                    }))
+                    .route(web::post().to(predict)),
+            )
+            .service(
+                web::resource("/sentence-vector")
+                    .app_data(model_data.clone())
+                    .app_data(web::Json::<Vec<String>>::configure(|cfg| {
+                        cfg.limit(20_971_520) // 20MB
+                            .content_type(|_mime| true) // Accept any content type
+                    }))
+                    .route(web::post().to(sentence_vector)),
+            )
     })
     .workers(workers);
 
