@@ -574,7 +574,7 @@ dependencies = [
 
 [[package]]
 name = "fasttext-serving"
-version = "0.6.0-alpha.1"
+version = "0.6.0-alpha.2"
 dependencies = [
  "actix-rt 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-web 2.0.0-rc (registry+https://github.com/rust-lang/crates.io-index)",
