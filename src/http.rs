@@ -122,7 +122,7 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
         Address::IpPort(address, port) => server.bind((&address[..], port)).expect("bind failed"),
         Address::Unix(path) => server.bind_uds(path).expect("bind failed"),
     };
-    server.start();
+    server.run();
     sys.run().expect("run failed");
 }
 
