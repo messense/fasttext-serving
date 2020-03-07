@@ -14,7 +14,8 @@ mod fasttext_serving {
 }
 
 use fasttext_serving::{
-    fasttext_serving_server as server, PredictRequest, PredictResponse, Prediction,
+    fasttext_serving_server as server, PredictRequest, PredictResponse, Prediction, SentenceVector,
+    SentenceVectorRequest, SentenceVectorResponse,
 };
 
 #[derive(Debug, Clone)]
@@ -41,6 +42,23 @@ impl server::FasttextServing for FastTextServingService {
             predictions.push(Prediction { labels, probs });
         }
         Ok(Response::new(PredictResponse { predictions }))
+    }
+
+    async fn sentence_vector(
+        &self,
+        request: Request<Streaming<SentenceVectorRequest>>,
+    ) -> Result<Response<SentenceVectorResponse>, Status> {
+        let stream = request.into_inner();
+        futures::pin_mut!(stream);
+        let mut vectors = Vec::new();
+        let model = self.model.clone();
+        while let Some(req) = stream.next().await {
+            let req = req?;
+            let text = req.text;
+            let values = model.get_sentence_vector(&text);
+            vectors.push(SentenceVector { values });
+        }
+        Ok(Response::new(SentenceVectorResponse { vectors }))
     }
 }
 
