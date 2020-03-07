@@ -1,6 +1,6 @@
 # fasttext-serving
 
-[![Build Status](https://travis-ci.org/messense/fasttext-serving.svg?branch=master)](https://travis-ci.org/messense/fasttext-serving)
+[![GitHub Actions](https://github.com/messense/fasttext-serving/workflows/CI/badge.svg)](https://github.com/messense/fasttext-serving/actions?query=workflow%3ACI)
 [![Crates.io](https://img.shields.io/crates/v/fasttext-serving.svg)](https://crates.io/crates/fasttext-serving)
 
 fastText model serving service
