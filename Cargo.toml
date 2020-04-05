@@ -34,13 +34,13 @@ actix-rt = { version = "1.0.0", optional = true }
 serde = { version = "1.0.92", features = ["derive"] }
 # grpc dependencies
 prost = { version = "0.6", optional = true }
-tonic = { version = "0.1.0", optional = true }
+tonic = { version = "0.2.0", optional = true }
 futures = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
 tokio = { version = "0.2", features = ["rt-threaded", "time", "stream", "macros"], optional = true }
 bytes = { version = "0.5", optional = true }
 
 [build-dependencies]
-tonic-build = { version = "0.1.0", default-features = false, features = ["transport"], optional = true }
+tonic-build = { version = "0.2", default-features = false, features = ["transport", "prost"], optional = true }
 
 [features]
 default = ["http", "grpc"]
