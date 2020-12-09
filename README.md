@@ -2,6 +2,7 @@
 
 [![GitHub Actions](https://github.com/messense/fasttext-serving/workflows/CI/badge.svg)](https://github.com/messense/fasttext-serving/actions?query=workflow%3ACI)
 [![Crates.io](https://img.shields.io/crates/v/fasttext-serving.svg)](https://crates.io/crates/fasttext-serving)
+[![Docker Pulls](https://img.shields.io/docker/pulls/messense/fasttext-serving)](https://hub.docker.com/r/messense/fasttext-serving)
 
 fastText model serving service
 
@@ -12,6 +13,12 @@ or install it using Cargo:
 
 ```bash
 cargo install fasttext-serving
+```
+
+Using Docker:
+
+```bash
+docker pull messense/fasttext-serving
 ```
 
 ## Usage
