@@ -120,7 +120,16 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     let sys = System::new("http-server");
     server = match addr {
         Address::IpPort(address, port) => server.bind((&address[..], port)).expect("bind failed"),
-        Address::Unix(path) => server.bind_uds(path).expect("bind failed"),
+        Address::Unix(path) => {
+            #[cfg(unix)]
+            {
+                server.bind_uds(path).expect("bind failed")
+            }
+            #[cfg(not(unix))]
+            {
+                panic!("Unix domain socket is not supported on this platform")
+            }
+        }
     };
     server.run();
     sys.run().expect("run failed");
