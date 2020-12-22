@@ -8,8 +8,13 @@ mod grpc;
 #[cfg(feature = "http")]
 mod http;
 
+#[cfg(all(unix, not(target_env = "musl"), not(target_arch = "aarch64")))]
 #[global_allocator]
 static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
+#[cfg(windows)]
+#[global_allocator]
+static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[inline]
 pub fn predict_one(

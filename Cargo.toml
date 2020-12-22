@@ -28,7 +28,6 @@ clap = "2.30"
 log = "0.4.4"
 pretty_env_logger = "0.4.0"
 num_cpus = "1.8.0"
-jemallocator = { version = "0.3.0", features= ["unprefixed_malloc_on_supported_platforms"] }
 actix-web = { version = "3.0.0", default-features = false, features = ["compress"], optional = true }
 serde = { version = "1.0.92", features = ["derive"] }
 # grpc dependencies
@@ -37,6 +36,12 @@ tonic = { version = "0.3", optional = true }
 futures = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
 tokio = { version = "0.2", features = ["rt-threaded", "time", "stream", "macros"], optional = true }
 bytes = { version = "0.5", optional = true }
+
+[target.'cfg(all(unix, not(target_env = "musl"), not(target_arch = "aarch64")))'.dependencies]
+jemallocator = { version = "0.3.0", features= ["unprefixed_malloc_on_supported_platforms"] }
+
+[target.'cfg(windows)'.dependencies]
+mimalloc = {version = "0.1"}
 
 [build-dependencies]
 tonic-build = { version = "0.3", default-features = false, features = ["transport", "prost"], optional = true }
