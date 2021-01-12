@@ -131,8 +131,7 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
             }
         }
     };
-    server.run();
-    sys.run().expect("run failed");
+    sys.block_on(async { server.run().await }).unwrap();
 }
 
 #[cfg(test)]

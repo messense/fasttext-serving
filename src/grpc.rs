@@ -70,10 +70,9 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: 
     let addr = (address, port).to_socket_addrs().unwrap().next().unwrap();
     let server = Server::builder().add_service(service);
     log::info!("Listening on {}:{}", address, port);
-    tokio::runtime::Builder::new()
+    tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .threaded_scheduler()
-        .core_threads(num_threads)
+        .worker_threads(num_threads)
         .build()
         .unwrap()
         .block_on(async {
