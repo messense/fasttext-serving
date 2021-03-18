@@ -32,7 +32,8 @@ actix-web = { version = "4.0.0-beta.1", default-features = false, features = ["c
 serde = { version = "1.0.92", features = ["derive"] }
 # grpc dependencies
 prost = { version = "0.7", optional = true }
-tonic = { version = "0.4", optional = true }
+tonic = { version = "0.4.1", optional = true }
+tonic-reflection = { version = "0.1.0", optional = true }
 futures = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
 tokio = { version = "1.0", features = ["rt-multi-thread", "time", "macros"], optional = true }
 bytes = { version = "1.0", optional = true }
@@ -44,12 +45,12 @@ jemallocator = { version = "0.3.0", features= ["unprefixed_malloc_on_supported_p
 mimalloc = {version = "0.1"}
 
 [build-dependencies]
-tonic-build = { version = "0.4", default-features = false, features = ["transport", "prost"], optional = true }
+tonic-build = { version = "0.4.1", default-features = false, features = ["transport", "prost"], optional = true }
 
 [features]
 default = ["http", "grpc"]
 http = ["actix-web"]
-grpc = ["tonic", "tokio", "futures", "prost", "bytes", "tonic-build"]
+grpc = ["tonic", "tokio", "futures", "prost", "bytes", "tonic-build", "tonic-reflection"]
 
 [profile.release]
 lto = true

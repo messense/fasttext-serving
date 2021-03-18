@@ -9,11 +9,14 @@ use tonic::{Request, Response, Status, Streaming};
 use crate::predict_one;
 
 #[allow(non_camel_case_types)]
-mod fasttext_serving {
+mod proto {
     tonic::include_proto!("fasttext_serving");
+
+    pub(crate) const FILE_DESCRIPTOR_SET: &'static [u8] =
+        tonic::include_file_descriptor_set!("fasttext_serving_descriptor");
 }
 
-use fasttext_serving::{
+use proto::{
     fasttext_serving_server as server, PredictRequest, PredictResponse, Prediction, SentenceVector,
     SentenceVectorRequest, SentenceVectorResponse,
 };
@@ -63,12 +66,18 @@ impl server::FasttextServing for FastTextServingService {
 }
 
 pub(crate) fn runserver(model: FastText, address: &str, port: u16, num_threads: usize) {
+    let reflection_service = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
+        .build()
+        .unwrap();
     let instance = FastTextServingService {
         model: Arc::new(model),
     };
     let service = server::FasttextServingServer::new(instance);
     let addr = (address, port).to_socket_addrs().unwrap().next().unwrap();
-    let server = Server::builder().add_service(service);
+    let server = Server::builder()
+        .add_service(reflection_service)
+        .add_service(service);
     log::info!("Listening on {}:{}", address, port);
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()

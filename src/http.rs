@@ -117,7 +117,7 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     })
     .workers(workers);
 
-    let sys = System::new("http-server");
+    let sys = System::new();
     server = match addr {
         Address::IpPort(address, port) => server.bind((&address[..], port)).expect("bind failed"),
         Address::Unix(path) => {
