@@ -28,16 +28,11 @@ jobs:
         with:
           command: build
           args: --release
-      - name: Build Debian package
-        run: |
-            cargo install --force cargo-deb
-            cargo deb --no-build --no-strip
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             target/release/fasttext-serving
-            target/debian/fasttext-serving*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image to Docker Hub
