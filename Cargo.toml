@@ -9,19 +9,6 @@ readme = "README.md"
 repository = "https://github.com/messense/fasttext-serving.git"
 exclude = ["models/*"]
 
-[package.metadata.deb]
-maintainer = "Messense Lv <messense@icloud.com>"
-copyright = "2018, Messense Lv. <messense@icloud.com>"
-license-file = ["LICENSE", "3"]
-extended-description = "fastText model serving API server"
-depends = "$auto"
-section = "text"
-priority = "optional"
-assets = [
-    # binary
-    ["target/release/fasttext-serving", "usr/bin/", "755"],
-]
-
 [dependencies]
 fasttext = "0.5"
 clap = "2.30"
@@ -57,3 +44,6 @@ lto = true
 
 [dev-dependencies]
 actix-rt = "2.0.0-beta.2"
+
+[package.metadata.maturin]
+name = "fasttext-serving-server"

@@ -101,7 +101,7 @@ fn main() {
         .get_matches();
     let model_path = matches.value_of("model").unwrap();
     if !Path::new(model_path).exists() {
-        panic!(format!("Error: model {} does not exists", model_path));
+        panic!("Error: model {} does not exists", model_path);
     }
     let address = matches.value_of("address").expect("missing address");
     let port = matches.value_of("port").expect("missing port");
