@@ -68,7 +68,8 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: '10.9'
           PYO3_CROSS_LIB_DIR: /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.8/lib
         run: |
-          # Build wheels
+          # set SDKROOT for C dependencies like ring and bzip2
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           maturin build -i python --release --universal2 --out dist --no-sdist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
