@@ -523,7 +523,7 @@ dependencies = [
 
 [[package]]
 name = "fasttext-serving"
-version = "0.6.2"
+version = "0.6.3"
 dependencies = [
  "actix-rt",
  "actix-web",
@@ -1080,9 +1080,9 @@ checksum = "dbf0c48bc1d91375ae5c3cd81e3722dff1abcf81a30960240640d223f59fe0e5"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.24"
+version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
+checksum = "37015eacd32e5cb0cb453d8888d5aad735e257cfc5b7aca77ad121a70ab326f9"
 dependencies = [
  "unicode-xid",
 ]
