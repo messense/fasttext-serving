@@ -58,7 +58,9 @@ impl server::FasttextServing for FastTextServingService {
         while let Some(req) = stream.next().await {
             let req = req?;
             let text = req.text;
-            let values = model.get_sentence_vector(&text);
+            let values = model
+                .get_sentence_vector(&text)
+                .expect("get_sentence_vector failed");
             vectors.push(SentenceVector { values });
         }
         Ok(Response::new(SentenceVectorResponse { vectors }))

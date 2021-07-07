@@ -10,12 +10,12 @@ repository = "https://github.com/messense/fasttext-serving.git"
 exclude = ["models/*"]
 
 [dependencies]
-fasttext = "0.5"
+fasttext = "0.6"
 clap = "2.30"
 log = "0.4.4"
 pretty_env_logger = "0.4.0"
 num_cpus = "1.8.0"
-actix-web = { version = "4.0.0-beta.1", default-features = false, features = ["compress"], optional = true }
+actix-web = { version = "4.0.0-beta.8", default-features = false, optional = true }
 serde = { version = "1.0.92", features = ["derive"] }
 # grpc dependencies
 prost = { version = "0.7", optional = true }

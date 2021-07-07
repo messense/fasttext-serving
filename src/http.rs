@@ -84,7 +84,11 @@ async fn sentence_vector(
         0 => Vec::new(),
         _ => texts
             .iter()
-            .map(|txt| model.get_sentence_vector(txt))
+            .map(|txt| {
+                model
+                    .get_sentence_vector(txt)
+                    .expect("get_sentence_vector failed")
+            })
             .collect(),
     };
     web::Json(ret)
