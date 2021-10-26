@@ -3,7 +3,7 @@ use std::io;
 use std::str::FromStr;
 
 use actix_web::rt::System;
-use actix_web::{web, App, FromRequest, HttpServer};
+use actix_web::{web, App, HttpServer};
 use fasttext::FastText;
 use serde::Deserialize;
 
@@ -98,24 +98,21 @@ pub(crate) fn runserver(model: FastText, address: &str, port: u16, workers: usiz
     let addr = Address::from((address, port));
     log::info!("Listening on {}", addr);
     let model_data = web::Data::new(model);
+    let json_cfg = web::JsonConfig::default()
+        .limit(20_971_520) // 20MB
+        .content_type(|_mime| true); // Accept any content type
     let mut server = HttpServer::new(move || {
         App::new()
             .service(
                 web::resource("/predict")
                     .app_data(model_data.clone())
-                    .app_data(web::Json::<Vec<String>>::configure(|cfg| {
-                        cfg.limit(20_971_520) // 20MB
-                            .content_type(|_mime| true) // Accept any content type
-                    }))
+                    .app_data(json_cfg.clone())
                     .route(web::post().to(predict)),
             )
             .service(
                 web::resource("/sentence-vector")
                     .app_data(model_data.clone())
-                    .app_data(web::Json::<Vec<String>>::configure(|cfg| {
-                        cfg.limit(20_971_520) // 20MB
-                            .content_type(|_mime| true) // Accept any content type
-                    }))
+                    .app_data(json_cfg.clone())
                     .route(web::post().to(sentence_vector)),
             )
     })
