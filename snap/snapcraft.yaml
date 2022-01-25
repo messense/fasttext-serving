@@ -19,6 +19,8 @@ parts:
   fasttext-serving:
     plugin: rust
     source: .
+    build-packages:
+      - cmake
 
 apps:
   fasttext-serving:

@@ -59,33 +59,33 @@ fn main() {
         .about("fastText model serving service")
         .author("Messense Lv <messense@icloud.com>")
         .arg(
-            Arg::with_name("model")
+            Arg::new("model")
                 .required(true)
-                .short("m")
+                .short('m')
                 .long("model")
                 .value_name("model")
                 .takes_value(true)
                 .help("Model path"),
         )
         .arg(
-            Arg::with_name("address")
-                .short("a")
+            Arg::new("address")
+                .short('a')
                 .long("address")
                 .default_value("127.0.0.1")
                 .takes_value(true)
                 .help("Listen address"),
         )
         .arg(
-            Arg::with_name("port")
-                .short("p")
+            Arg::new("port")
+                .short('p')
                 .long("port")
                 .default_value("8000")
                 .takes_value(true)
                 .help("Listen port"),
         )
         .arg(
-            Arg::with_name("workers")
-                .short("w")
+            Arg::new("workers")
+                .short('w')
                 .long("workers")
                 .alias("concurrency")
                 .alias("threads")
@@ -94,7 +94,7 @@ fn main() {
                 .help("Worker thread count, defaults to CPU count"),
         )
         .arg(
-            Arg::with_name("grpc")
+            Arg::new("grpc")
                 .long("grpc")
                 .help("Serving gRPC API instead of HTTP API"),
         )
