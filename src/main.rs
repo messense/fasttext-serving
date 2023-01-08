@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, ArgAction, Command};
 use fasttext::FastText;
 use std::env;
 use std::path::Path;
@@ -54,7 +54,7 @@ fn main() {
     pretty_env_logger::init();
 
     let num_threads = num_cpus::get().to_string();
-    let matches = App::new("fasttext-serving")
+    let matches = Command::new("fasttext-serving")
         .version(env!("CARGO_PKG_VERSION"))
         .about("fastText model serving service")
         .author("Messense Lv <messense@icloud.com>")
@@ -96,23 +96,28 @@ fn main() {
         .arg(
             Arg::new("grpc")
                 .long("grpc")
+                .action(ArgAction::SetTrue)
                 .help("Serving gRPC API instead of HTTP API"),
         )
         .get_matches();
-    let model_path = matches.value_of("model").unwrap();
+    let model_path = matches.get_one::<String>("model").unwrap();
     if !Path::new(model_path).exists() {
         panic!("Error: model {} does not exists", model_path);
     }
-    let address = matches.value_of("address").expect("missing address");
-    let port = matches.value_of("port").expect("missing port");
-    let workers = matches.value_of("workers").expect("missing workers");
+    let address = matches
+        .get_one::<String>("address")
+        .expect("missing address");
+    let port = matches.get_one::<String>("port").expect("missing port");
+    let workers = matches
+        .get_one::<String>("workers")
+        .expect("missing workers");
     let mut model = FastText::new();
     model
         .load_model(model_path)
         .expect("Failed to load fastText model");
     let port: u16 = port.parse().expect("invalid port");
     let workers: usize = workers.parse().expect("invalid workers");
-    if matches.is_present("grpc") {
+    if matches.get_flag("grpc") {
         #[cfg(feature = "grpc")]
         crate::grpc::runserver(model, address, port, workers);
         #[cfg(not(feature = "grpc"))]
