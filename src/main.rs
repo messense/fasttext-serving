@@ -64,7 +64,7 @@ fn main() {
                 .short('m')
                 .long("model")
                 .value_name("model")
-                .takes_value(true)
+                .num_args(1)
                 .help("Model path"),
         )
         .arg(
@@ -72,7 +72,7 @@ fn main() {
                 .short('a')
                 .long("address")
                 .default_value("127.0.0.1")
-                .takes_value(true)
+                .num_args(1)
                 .help("Listen address"),
         )
         .arg(
@@ -80,7 +80,7 @@ fn main() {
                 .short('p')
                 .long("port")
                 .default_value("8000")
-                .takes_value(true)
+                .num_args(1)
                 .help("Listen port"),
         )
         .arg(
@@ -90,7 +90,7 @@ fn main() {
                 .alias("concurrency")
                 .alias("threads")
                 .default_value(&num_threads)
-                .takes_value(true)
+                .num_args(1)
                 .help("Worker thread count, defaults to CPU count"),
         )
         .arg(
