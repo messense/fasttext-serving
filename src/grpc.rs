@@ -39,7 +39,7 @@ impl server::FasttextServing for FastTextServingService {
         while let Some(req) = stream.next().await {
             let req = req?;
             let text = req.text;
-            let k = req.k.unwrap_or(1);
+            let k = req.k.unwrap_or(5);
             let threshold = req.threshold.unwrap_or(0.0);
             let (labels, probs) = predict_one(&model, &text, k, threshold);
             predictions.push(Prediction { labels, probs });
